@@ -1,4 +1,5 @@
-enum Response {
+enum Response
+{
     SUCCESS,
     FAILED,
     QUIT

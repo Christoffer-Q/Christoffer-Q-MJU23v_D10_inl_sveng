@@ -9,15 +9,6 @@ public class Word
         this.Translation = translation;
     }
 
-    //  FIXME
-    //  * Move the logic to the read file function instead
-    //  * Remove this constructor
-    public Word(string line)
-    {
-        string[] words = line.Split('|');
-        this.Origin = words[0]; this.Translation = words[1];
-    }
-
     public void printTranslation()
     {
         Console.WriteLine($"English for {this.Origin} is {this.Translation}");

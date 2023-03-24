@@ -7,6 +7,7 @@ namespace MJU23v_D10_inl_sveng
         //  FIXME GLOBAL
         //  * Ensure the user is informed of the outcome of each action
         //  * Add one dictionary for each language and place them in a dictonary. Use keys to access the correct language.
+        //  * Add NUnit tests
 
         private List<Word> glossary = new List<Word>();
         private List<string> commands = new List<string>();
@@ -113,7 +114,9 @@ namespace MJU23v_D10_inl_sveng
             return FAILED;
         }
 
-        private Response printHelp() {
+        // FIXME document this function
+        private Response printHelp()
+        {
             System.Console.WriteLine("help - shows this list of commands.");
             System.Console.WriteLine("load - loads a text file into memory.");
             System.Console.WriteLine("list - list all the words in the dictionary.");
@@ -133,10 +136,9 @@ namespace MJU23v_D10_inl_sveng
         {
             if (isValidPath(defaultFile))
             {
-                populateGlossaryList(
+                return populateGlossaryList(
                     readFileToArray(defaultFile)
                 );
-                return SUCCESS;
             }
 
             return FAILED;
@@ -152,10 +154,9 @@ namespace MJU23v_D10_inl_sveng
             string customPath = arguments[1];
             if (isValidPath(customPath))
             {
-                populateGlossaryList(
+                return populateGlossaryList(
                     readFileToArray(customPath)
                     );
-                return SUCCESS;
             }
             else
             {
@@ -279,16 +280,21 @@ namespace MJU23v_D10_inl_sveng
         /// Creates a new Word object for each line found in the glossary data file.
         /// </summary>
         /// <param name="data"></param>
-        private void populateGlossaryList(string[] data)
+        private Response populateGlossaryList(string[] data)
         {
             foreach (string entry in data)
             {
-                string sanitizedEntry = sanitizeInput(entry);
-                if (!sanitizedEntry.Equals(""))
-                {
-                    glossary.Add(new Word(sanitizedEntry));
-                }
+                string[] words = entry.Split('|');
+                if (words.Length < 2) return FAILED;
+
+                string origin = sanitizeInput(words[0]);
+                string translate = sanitizeInput(words[1]);
+
+                if (origin.Equals("") || translate.Equals("")) return FAILED;
+
+                glossary.Add(new Word(origin, translate));
             }
+            return SUCCESS;
         }
 
         /// <summary>
