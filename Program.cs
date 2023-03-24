@@ -75,7 +75,7 @@ namespace MJU23v_D10_inl_sveng
                 string command = arguments[0];
                 response = executeCommand(command, arguments);
 
-                if (response.Equals(FAILED)) 
+                if (response.Equals(FAILED))
                 {
                     System.Console.WriteLine("Failed to execute the command: {0}, returning to main menu.", command);
                     continue;
@@ -104,8 +104,8 @@ namespace MJU23v_D10_inl_sveng
                 case "translate": return translateWord(arguments);
 
                 case "q":
-                case "quit": 
-                return QUIT;
+                case "quit":
+                    return QUIT;
             }
 
             return FAILED;
@@ -155,17 +155,13 @@ namespace MJU23v_D10_inl_sveng
         {
             foreach (Word word in glossary)
             {
-                //  FIXME 
-                //  * Create an overloaded toString() function in Word.cs
-                Console.WriteLine($"{word.Origin,-10}  -  {word.Translation,-10}");
+                Console.WriteLine(word.ToString());
             }
             return SUCCESS;
         }
 
         private Response newWord(string[] arguments)
         {
-            //  FIXME
-            //  Sanitize the arguments
             if (arguments.Length == 3)
             {
                 glossary.Add(new Word(arguments[1], arguments[2]));
@@ -189,30 +185,22 @@ namespace MJU23v_D10_inl_sveng
 
         private Response deleteWord(string[] arguments)
         {
-            if (arguments.Length == 3)
+            for (int i = 0; i < glossary.Count; i++)
             {
-                //  FIXME
-                //  * Move this to function removeGlossary()
-                for (int i = 0; i < glossary.Count; i++)
+                Word? word = null;
+                if (arguments.Length == 1)
+                    word = convertUserInputToWordObject();
+                else if (arguments.Length == 3)
+                    word = glossary[i];
+                else
+                    return FAILED;
+
+                if (word.Origin == arguments[1] && word.Translation == arguments[2])
                 {
-                    Word word = glossary[i];
-                    if (word.Origin == arguments[1] && word.Translation == arguments[2])
-                    {
-                        glossary.RemoveAt(i);
-                        return SUCCESS;
-                    }
+                    glossary.RemoveAt(i);
+                    return SUCCESS;
                 }
             }
-            else if (arguments.Length == 1)
-            {
-                Word? word = convertUserInputToWordObject();
-
-                //  FIXME
-                //  * Call function removeGlossary()
-            }
-
-            //  FIXME    
-            //  * Call updateGlossaryDatabase()
             return FAILED;
         }
 
@@ -280,7 +268,7 @@ namespace MJU23v_D10_inl_sveng
                 string sanitizedEntry = sanitizeInput(entry);
                 if (!sanitizedEntry.Equals(""))
                 {
-                glossary.Add(new Word(sanitizedEntry));
+                    glossary.Add(new Word(sanitizedEntry));
                 }
             }
         }
@@ -415,5 +403,6 @@ namespace MJU23v_D10_inl_sveng
 
             return new Word(origin, translation);
         }
+
     }
 }
