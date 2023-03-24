@@ -7,7 +7,7 @@ namespace MJU23v_D10_inl_sveng
         //  FIXME GLOBAL
         //  * Add 'help' as an option for the user
         //  * Ensure the user is informed of the outcome of each action
-        //  * Do not allow the user to manipulate the glossary unless it's loaded with data
+        //  * Add one dictionary for each language and place them in a dictonary. Use keys to access the correct language.
 
         private List<Word> glossary = new List<Word>();
         private List<string> commands = new List<string>();
@@ -151,6 +151,7 @@ namespace MJU23v_D10_inl_sveng
             }
         }
 
+        // FIXME document this
         private Response listWords(string[] arguments)
         {
             foreach (Word word in glossary)
@@ -160,6 +161,7 @@ namespace MJU23v_D10_inl_sveng
             return SUCCESS;
         }
 
+        // FIXME document this
         private Response newWord(string[] arguments)
         {
             if (arguments.Length == 3)
@@ -183,6 +185,7 @@ namespace MJU23v_D10_inl_sveng
             return FAILED;
         }
 
+        // FIXME document this
         private Response deleteWord(string[] arguments)
         {
             for (int i = 0; i < glossary.Count; i++)
@@ -204,6 +207,7 @@ namespace MJU23v_D10_inl_sveng
             return FAILED;
         }
 
+        // FIXME document this
         private Response translateWord(string[] arguments)
         {
             Response hasMatch = FAILED;
@@ -252,6 +256,7 @@ namespace MJU23v_D10_inl_sveng
             return hasMatch;
         }
 
+        //  FIXME document this
         private void quit()
         {
             System.Console.WriteLine("Goodbye!");
@@ -403,6 +408,5 @@ namespace MJU23v_D10_inl_sveng
 
             return new Word(origin, translation);
         }
-
     }
 }
