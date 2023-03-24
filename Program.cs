@@ -98,7 +98,7 @@ namespace MJU23v_D10_inl_sveng
         {
             switch (command)
             {
-                case "help": return printHelp(arguments);
+                case "help": return printHelp();
                 case "load": return loadGlossary(arguments);
                 case "list": return listWords(arguments);
                 case "new": return newWord(arguments);
@@ -113,7 +113,7 @@ namespace MJU23v_D10_inl_sveng
             return FAILED;
         }
 
-        private Response printHelp(string[] arguments) {
+        private Response printHelp() {
             System.Console.WriteLine("help - shows this list of commands.");
             System.Console.WriteLine("load - loads a text file into memory.");
             System.Console.WriteLine("list - list all the words in the dictionary.");
