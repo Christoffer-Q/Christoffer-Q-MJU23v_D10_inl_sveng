@@ -12,14 +12,34 @@
         public static void Main(string[] args)
         {
             Program dictionaryApplication = new Program();
-            dictionaryApplication.run();
+            if (dictionaryApplication.isBooted())
+            {
+                dictionaryApplication.run();
+            }
+            else
+            {
+                System.Console.WriteLine("The application could not be started.");
+            }
+
+
         }
 
+        /// <summary>
+        /// Initializes the application with standard values
+        /// </summary>
+        /// <returns>true if the glossary could be loaded from the file, else false.</returns>
+        private bool isBooted()
+        {
+            return loadGlossary("dict/sweeng.lis");
+        }
+
+        /// <summary>
+        /// Runs until the user chooses to stop the program.
+        /// </summary>
         private void run()
         {
             //  FIXME
             //  * Ensure we can read this path
-            string defaultFile = "dict/sweeng.lis";
             Console.WriteLine("Welcome to the dictionary app!");
             do
             {
@@ -30,20 +50,20 @@
                 //  * Add a new variable to track the length of the arguments array
                 string[] arguments = Console.ReadLine().Split();
                 string command = arguments[0];
-                executeCommand(command, arguments, defaultFile);
+                executeCommand(command, arguments);
             }
             //  FIXME
             //  * Ensure we can exit the program gracefully
             while (true);
         }
 
-        private void executeCommand(string command, string[] arguments, string defaultFile)
+        private void executeCommand(string command, string[] arguments)
         {
             switch (command)
             {
                 case "load":
                     {
-                        loadGlossary(arguments, defaultFile);
+                        loadGlossary(arguments);
                         break;
                     }
                 case "list":
@@ -80,43 +100,43 @@
             }
         }
 
-        private bool loadGlossary(string[] arguments, string defaultFile)
+        /// <summary>
+        /// Loads the default file into the glossary during boot
+        /// </summary>
+        /// <param name="defaultFile"></param>
+        /// <returns></returns>
+        private bool loadGlossary(string defaultFile)
         {
-            if (arguments.Length == 2)
+            if (isValidPath(defaultFile))
             {
-                //  FIXME
-                //  * Move file reading into its own function called populateGlossaryList()
-                //  * Make sure that arguments[1] is a valid path
-                using (StreamReader streamReader = new StreamReader(arguments[1]))
-                {
-                    glossary = new List<Word>();
-                    string line = streamReader.ReadLine();
-                    while (line != null)
-                    {
-                        Word word = new Word(line);
-                        glossary.Add(word);
-                        line = streamReader.ReadLine();
-                    }
-                }
+                populateGlossaryList(
+                    readFileToArray(defaultFile)
+                );
+                return true;
             }
-            else if (arguments.Length == 1)
+            return false;
+        }
+
+        /// <summary>
+        /// Loads the glossary from a custom path.
+        /// </summary>
+        /// <param name="arguments"></param>
+        /// <returns>true if the file could be loaded into the glossary list, else false.</returns>
+        private bool loadGlossary(string[] arguments)
+        {
+            string customPath = arguments[1];
+            if (isValidPath(customPath))
             {
-                //  FIXME
-                //  * Call function populateGlossaryList()
-                //  * Make sure to pass the defaultFile
-                using (StreamReader streamReader = new StreamReader(defaultFile))
-                {
-                    glossary = new List<Word>();
-                    string line = streamReader.ReadLine();
-                    while (line != null)
-                    {
-                        Word word = new Word(line);
-                        glossary.Add(word);
-                        line = streamReader.ReadLine();
-                    }
-                }
+                populateGlossaryList(
+                    readFileToArray(customPath)
+                    );
+                return true;
             }
-            return true;
+            else
+            {
+                System.Console.WriteLine("Invalid path for {0}", customPath);
+                return false;
+            }
         }
 
         private bool listWords(string[] arguments)
@@ -229,6 +249,84 @@
         private void quit()
         {
 
+        }
+
+        /// <summary>
+        /// Creates a new Word object for each line found in the glossary data file.
+        /// </summary>
+        /// <param name="data"></param>
+        private void populateGlossaryList(string[] data)
+        {
+            foreach (string entry in data)
+            {
+                //  FIXME
+                //  We should first sanitize and validate the entry
+                glossary.Add(new Word(entry));
+            }
+        }
+
+        /// <summary>
+        /// Attempts to read a file into an string array.
+        /// Will catch and print any exceptions. and in that case return an array with an empty string.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>string array with lines from the file or a single empty string if failed.</returns>
+        private string[] readFileToArray(string path)
+        {
+            try
+            {
+                if (isValidPath(path))
+                {
+                    return File.ReadAllLines(path);
+                }
+                else
+                {
+                    System.Console.WriteLine("Path {0} not found.", path);
+                }
+            }
+            catch (Exception exception)
+            {
+                System.Console.WriteLine(exception.ToString());
+            }
+            return new string[] { "" };
+        }
+
+        /// <summary>
+        /// Checks if the file exists
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>true if the file exists else false</returns>
+        private bool isValidPath(string path)
+        {
+            return File.Exists(path);
+        }
+
+        /// <summary>
+        /// Checks if the variable contains a value.
+        /// </summary>
+        /// <param name="variable">Any data type.</param>
+        /// <returns>true as long as the param has a value seperated from null and empty.</returns>
+        private bool hasValue(object variable)
+        {
+            if (variable != null)
+            {
+                if (Type.GetTypeCode(variable.GetType()).Equals(TypeCode.String))
+                {
+                    return !variable.Equals("");
+                }
+
+                if (variable.GetType().IsArray)
+                {
+                    string[] temp = (string[])variable;
+                    return temp.Length != 0;
+                }
+
+                //  We return true here so we can use this function as a 
+                //  pure null check unless the data type matches.
+                return true;
+            }
+
+            return false;
         }
     }
 }
