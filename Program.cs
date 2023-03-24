@@ -9,30 +9,6 @@
 
         private List<Word> glossary;
 
-        //  FIXME
-        //  * Move class to file
-        class Word
-        {
-            //  FIXME 
-            //  * Narrow access modifier to private
-            //  * Add getters and setters
-            public string origin, translation;
-
-            public Word(string origin, string translation)
-            {
-                this.origin = origin;
-                this.translation = translation;
-            }
-
-            //  FIXME
-            //  * Move the logic to the read file function instead
-            //  * Remove this constructor
-            public Word(string line)
-            {
-                string[] words = line.Split('|');
-                this.origin = words[0]; this.translation = words[1];
-            }
-        }
         public static void Main(string[] args)
         {
             Program dictionaryApplication = new Program();
@@ -48,7 +24,7 @@
             do
             {
                 Console.Write("> ");
-                
+
                 //  FIXME
                 //  * Sanitize the input and make it lower case, create new function for it
                 //  * Add a new variable to track the length of the arguments array
@@ -151,7 +127,7 @@
             {
                 //  FIXME 
                 //  * Create an overloaded toString() function in Word.cs
-                Console.WriteLine($"{word.origin,-10}  -  {word.translation,-10}");
+                Console.WriteLine($"{word.Origin,-10}  -  {word.Translation,-10}");
             }
             return true;
         }
@@ -189,7 +165,7 @@
                 for (int i = 0; i < glossary.Count; i++)
                 {
                     Word word = glossary[i];
-                    if (word.origin == arguments[1] && word.translation == arguments[2])
+                    if (word.Origin == arguments[1] && word.Translation == arguments[2])
                     {
                         glossary.RemoveAt(i);
                     }
@@ -217,14 +193,14 @@
                 //  * Ensure we have something in dictionary to iterate over before we do it
                 foreach (Word word in glossary)
                 {
-                    if (word.origin == arguments[1])
+                    if (word.Origin == arguments[1])
                         // FIXME 
                         //  * Move to function in Word.cs
-                        Console.WriteLine($"English for {word.origin} is {word.translation}");
-                    if (word.translation == arguments[1])
+                        Console.WriteLine($"English for {word.Origin} is {word.Translation}");
+                    if (word.Translation == arguments[1])
                         // FIXME 
                         //  * Move to function in Word.cs
-                        Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
+                        Console.WriteLine($"Swedish for {word.Translation} is {word.Origin}");
                 }
             }
             else if (arguments.Length == 1)
@@ -237,14 +213,14 @@
                 //  * Ensure we have something in dictionary to iterate over before we do it
                 foreach (Word word in glossary)
                 {
-                    if (word.origin == userInputWord)
+                    if (word.Origin == userInputWord)
                         // FIXME 
                         //  * Move to function in Word.cs
-                        Console.WriteLine($"English for {word.origin} is {word.translation}");
-                    if (word.translation == userInputWord)
+                        Console.WriteLine($"English for {word.Origin} is {word.Translation}");
+                    if (word.Translation == userInputWord)
                         // FIXME 
                         //  * Move to function in Word.cs
-                        Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
+                        Console.WriteLine($"Swedish for {word.Translation} is {word.Origin}");
                 }
             }
             return true;
