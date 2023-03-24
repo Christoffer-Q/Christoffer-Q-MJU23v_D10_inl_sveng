@@ -65,15 +65,15 @@
                         //  FIXME
                         //  * Move file reading into its own function called populateGlossaryList()
                         //  * Make sure that arguments[1] is a valid path
-                        using (StreamReader sr = new StreamReader(arguments[1]))
+                        using (StreamReader streamReader = new StreamReader(arguments[1]))
                         {
                             glossary = new List<Word>();
-                            string line = sr.ReadLine();
+                            string line = streamReader.ReadLine();
                             while (line != null)
                             {
                                 Word word = new Word(line);
                                 glossary.Add(word);
-                                line = sr.ReadLine();
+                                line = streamReader.ReadLine();
                             }
                         }
                     }
@@ -82,15 +82,15 @@
                         //  FIXME
                         //  * Call function populateGlossaryList()
                         //  * Make sure to pass the defaultFile
-                        using (StreamReader sr = new StreamReader(defaultFile))
+                        using (StreamReader streamReader = new StreamReader(defaultFile))
                         {
                             glossary = new List<Word>();
-                            string line = sr.ReadLine();
+                            string line = streamReader.ReadLine();
                             while (line != null)
                             {
                                 Word word = new Word(line);
                                 glossary.Add(word);
-                                line = sr.ReadLine();
+                                line = streamReader.ReadLine();
                             }
                         }
                     }
@@ -117,12 +117,12 @@
                         Console.WriteLine("Write word in Swedish: ");
                         //  FIXME
                         //  * Move this to function readStdIn()
-                        string s = Console.ReadLine();
+                        string origin = Console.ReadLine();
                         Console.Write("Write word in English: ");
                         //  FIXME
                         //  * Move this to function readStdIn()
-                        string e = Console.ReadLine();
-                        glossary.Add(new Word(s, e));
+                        string translation = Console.ReadLine();
+                        glossary.Add(new Word(origin, translation));
 
                         //  FIXME
                         //  * Create a function updateGlossaryDatabase() to update the file
@@ -178,16 +178,16 @@
                         Console.WriteLine("Write word to be translated: ");
                         //  FIXME
                         //  * Move this to function readStdIn()
-                        string s = Console.ReadLine();
+                        string userInputWord = Console.ReadLine();
                         //  FIXME
                         //  * Ensure we have something in dictionary to iterate over before we do it
                         foreach (Word word in glossary)
                         {
-                            if (word.origin == s)
+                            if (word.origin == userInputWord)
                                 // FIXME 
                                 //  * Move to function in Word.cs
                                 Console.WriteLine($"English for {word.origin} is {word.translation}");
-                            if (word.translation == s)
+                            if (word.translation == userInputWord)
                                 // FIXME 
                                 //  * Move to function in Word.cs
                                 Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
