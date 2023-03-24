@@ -155,17 +155,13 @@ namespace MJU23v_D10_inl_sveng
         {
             foreach (Word word in glossary)
             {
-                //  FIXME 
-                //  * Create an overloaded toString() function in Word.cs
-                Console.WriteLine($"{word.Origin,-10}  -  {word.Translation,-10}");
+                Console.WriteLine(word.ToString());
             }
             return SUCCESS;
         }
 
         private Response newWord(string[] arguments)
         {
-            //  FIXME
-            //  Sanitize the arguments
             if (arguments.Length == 3)
             {
                 glossary.Add(new Word(arguments[1], arguments[2]));
@@ -198,7 +194,7 @@ namespace MJU23v_D10_inl_sveng
                     word = glossary[i];
                 else
                     return FAILED;
-                    
+
                 if (word.Origin == arguments[1] && word.Translation == arguments[2])
                 {
                     glossary.RemoveAt(i);

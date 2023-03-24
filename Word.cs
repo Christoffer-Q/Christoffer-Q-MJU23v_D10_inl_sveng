@@ -27,4 +27,9 @@ public class Word
     {
         Console.WriteLine($"Swedish for {this.Translation} is {this.Origin}");
     }
+
+    public override string ToString()
+    {
+        return $"{Origin,-10}  -  {Translation,-10}";
+    }
 }
