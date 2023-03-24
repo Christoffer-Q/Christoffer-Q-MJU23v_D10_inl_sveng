@@ -7,9 +7,7 @@
         //  * Ensure the user is informed of the outcome of each action
         //  * Do not allow the user to manipulate the glossary unless it's loaded with data
 
-        //  FIXME
-        //  * Remove static and narrow the access modifier to private
-        static List<Word> glossary;
+        private List<Word> glossary;
 
         //  FIXME
         //  * Move class to file
@@ -37,8 +35,12 @@
         }
         public static void Main(string[] args)
         {
-            //  FIXME
-            //  * Move most of the logic into a run() function
+            Program dictionaryApplication = new Program();
+            dictionaryApplication.run();
+        }
+
+        private void run()
+        {
             //  FIXME
             //  * Ensure we can read this path
             string defaultFile = "dict/sweeng.lis";
@@ -46,162 +48,211 @@
             do
             {
                 Console.Write("> ");
-
+                
                 //  FIXME
                 //  * Sanitize the input and make it lower case, create new function for it
                 //  * Add a new variable to track the length of the arguments array
                 string[] arguments = Console.ReadLine().Split();
                 string command = arguments[0];
-                //  FIXME
-                //  * Replace the if-statements with a switch
-                if (command == "quit")
-                {
-                    Console.WriteLine("Goodbye!");
-                }
-                else if (command == "load")
-                {
-                    if (arguments.Length == 2)
-                    {
-                        //  FIXME
-                        //  * Move file reading into its own function called populateGlossaryList()
-                        //  * Make sure that arguments[1] is a valid path
-                        using (StreamReader streamReader = new StreamReader(arguments[1]))
-                        {
-                            glossary = new List<Word>();
-                            string line = streamReader.ReadLine();
-                            while (line != null)
-                            {
-                                Word word = new Word(line);
-                                glossary.Add(word);
-                                line = streamReader.ReadLine();
-                            }
-                        }
-                    }
-                    else if (arguments.Length == 1)
-                    {
-                        //  FIXME
-                        //  * Call function populateGlossaryList()
-                        //  * Make sure to pass the defaultFile
-                        using (StreamReader streamReader = new StreamReader(defaultFile))
-                        {
-                            glossary = new List<Word>();
-                            string line = streamReader.ReadLine();
-                            while (line != null)
-                            {
-                                Word word = new Word(line);
-                                glossary.Add(word);
-                                line = streamReader.ReadLine();
-                            }
-                        }
-                    }
-                }
-                else if (command == "list")
-                {
-                    //  FIXME
-                    //  * Ensure we have something in dictionary to iterate over before we do it
-                    foreach (Word word in glossary)
-                    {
-                        //  FIXME 
-                        //  * Create an overloaded toString() function in Word.cs
-                        Console.WriteLine($"{word.origin,-10}  -  {word.translation,-10}");
-                    }
-                }
-                else if (command == "new")
-                {
-                    if (arguments.Length == 3)
-                    {
-                        glossary.Add(new Word(arguments[1], arguments[2]));
-                    }
-                    else if (arguments.Length == 1)
-                    {
-                        Console.WriteLine("Write word in Swedish: ");
-                        //  FIXME
-                        //  * Move this to function readStdIn()
-                        string origin = Console.ReadLine();
-                        Console.Write("Write word in English: ");
-                        //  FIXME
-                        //  * Move this to function readStdIn()
-                        string translation = Console.ReadLine();
-                        glossary.Add(new Word(origin, translation));
-
-                        //  FIXME
-                        //  * Create a function updateGlossaryDatabase() to update the file
-                    }
-                }
-                else if (command == "delete")
-                {
-                    if (arguments.Length == 3)
-                    {
-                        //  FIXME
-                        //  * Move this to function removeGlossary()
-                        for (int i = 0; i < glossary.Count; i++)
-                        {
-                            Word word = glossary[i];
-                            if (word.origin == arguments[1] && word.translation == arguments[2])
-                            {
-                                glossary.RemoveAt(i);
-                            }
-                        }
-                    }
-                    else if (arguments.Length == 1)
-                    {
-                        //  FIXME
-                        //  * Call function readStdIn()
-
-                        //  FIXME
-                        //  * Call function removeGlossary()
-                    }
-
-                    //  FIXME    
-                    //  * Call updateGlossaryDatabase()
-                }
-                else if (command == "translate")
-                {
-                    if (arguments.Length == 2)
-                    {
-                        //  FIXME
-                        //  * Ensure we have something in dictionary to iterate over before we do it
-                        foreach (Word word in glossary)
-                        {
-                            if (word.origin == arguments[1])
-                                // FIXME 
-                                //  * Move to function in Word.cs
-                                Console.WriteLine($"English for {word.origin} is {word.translation}");
-                            if (word.translation == arguments[1])
-                                // FIXME 
-                                //  * Move to function in Word.cs
-                                Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
-                        }
-                    }
-                    else if (arguments.Length == 1)
-                    {
-                        Console.WriteLine("Write word to be translated: ");
-                        //  FIXME
-                        //  * Move this to function readStdIn()
-                        string userInputWord = Console.ReadLine();
-                        //  FIXME
-                        //  * Ensure we have something in dictionary to iterate over before we do it
-                        foreach (Word word in glossary)
-                        {
-                            if (word.origin == userInputWord)
-                                // FIXME 
-                                //  * Move to function in Word.cs
-                                Console.WriteLine($"English for {word.origin} is {word.translation}");
-                            if (word.translation == userInputWord)
-                                // FIXME 
-                                //  * Move to function in Word.cs
-                                Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"Unknown command: '{command}'");
-                }
+                executeCommand(command, arguments, defaultFile);
             }
             //  FIXME
             //  * Ensure we can exit the program gracefully
             while (true);
+        }
+
+        private void executeCommand(string command, string[] arguments, string defaultFile)
+        {
+            switch (command)
+            {
+                case "load":
+                    {
+                        loadGlossary(arguments, defaultFile);
+                        break;
+                    }
+                case "list":
+                    {
+                        listWords(arguments);
+                        break;
+                    }
+                case "new":
+                    {
+                        newWord(arguments);
+                        break;
+                    }
+                case "delete":
+                    {
+                        deleteWord(arguments);
+                        break;
+                    }
+                case "translate":
+                    {
+                        translateWord(arguments);
+                        break;
+                    }
+
+                case "quit":
+                    {
+                        Console.WriteLine("Goodbye!");
+                        break;
+                    }
+                default:
+                    {
+                        Console.WriteLine($"Unknown command: '{command}'");
+                        break;
+                    }
+            }
+        }
+
+        private bool loadGlossary(string[] arguments, string defaultFile)
+        {
+            if (arguments.Length == 2)
+            {
+                //  FIXME
+                //  * Move file reading into its own function called populateGlossaryList()
+                //  * Make sure that arguments[1] is a valid path
+                using (StreamReader streamReader = new StreamReader(arguments[1]))
+                {
+                    glossary = new List<Word>();
+                    string line = streamReader.ReadLine();
+                    while (line != null)
+                    {
+                        Word word = new Word(line);
+                        glossary.Add(word);
+                        line = streamReader.ReadLine();
+                    }
+                }
+            }
+            else if (arguments.Length == 1)
+            {
+                //  FIXME
+                //  * Call function populateGlossaryList()
+                //  * Make sure to pass the defaultFile
+                using (StreamReader streamReader = new StreamReader(defaultFile))
+                {
+                    glossary = new List<Word>();
+                    string line = streamReader.ReadLine();
+                    while (line != null)
+                    {
+                        Word word = new Word(line);
+                        glossary.Add(word);
+                        line = streamReader.ReadLine();
+                    }
+                }
+            }
+            return true;
+        }
+
+        private bool listWords(string[] arguments)
+        {
+            //  FIXME
+            //  * Ensure we have something in dictionary to iterate over before we do it
+            foreach (Word word in glossary)
+            {
+                //  FIXME 
+                //  * Create an overloaded toString() function in Word.cs
+                Console.WriteLine($"{word.origin,-10}  -  {word.translation,-10}");
+            }
+            return true;
+        }
+
+        private bool newWord(string[] arguments)
+        {
+            if (arguments.Length == 3)
+            {
+                glossary.Add(new Word(arguments[1], arguments[2]));
+            }
+            else if (arguments.Length == 1)
+            {
+                Console.WriteLine("Write word in Swedish: ");
+                //  FIXME
+                //  * Move this to function readStdIn()
+                string origin = Console.ReadLine();
+                Console.Write("Write word in English: ");
+                //  FIXME
+                //  * Move this to function readStdIn()
+                string translation = Console.ReadLine();
+                glossary.Add(new Word(origin, translation));
+
+                //  FIXME
+                //  * Create a function updateGlossaryDatabase() to update the file
+            }
+            return true;
+        }
+
+        private bool deleteWord(string[] arguments)
+        {
+            if (arguments.Length == 3)
+            {
+                //  FIXME
+                //  * Move this to function removeGlossary()
+                for (int i = 0; i < glossary.Count; i++)
+                {
+                    Word word = glossary[i];
+                    if (word.origin == arguments[1] && word.translation == arguments[2])
+                    {
+                        glossary.RemoveAt(i);
+                    }
+                }
+            }
+            else if (arguments.Length == 1)
+            {
+                //  FIXME
+                //  * Call function readStdIn()
+
+                //  FIXME
+                //  * Call function removeGlossary()
+            }
+
+            //  FIXME    
+            //  * Call updateGlossaryDatabase()
+            return true;
+        }
+
+        private bool translateWord(string[] arguments)
+        {
+            if (arguments.Length == 2)
+            {
+                //  FIXME
+                //  * Ensure we have something in dictionary to iterate over before we do it
+                foreach (Word word in glossary)
+                {
+                    if (word.origin == arguments[1])
+                        // FIXME 
+                        //  * Move to function in Word.cs
+                        Console.WriteLine($"English for {word.origin} is {word.translation}");
+                    if (word.translation == arguments[1])
+                        // FIXME 
+                        //  * Move to function in Word.cs
+                        Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
+                }
+            }
+            else if (arguments.Length == 1)
+            {
+                Console.WriteLine("Write word to be translated: ");
+                //  FIXME
+                //  * Move this to function readStdIn()
+                string userInputWord = Console.ReadLine();
+                //  FIXME
+                //  * Ensure we have something in dictionary to iterate over before we do it
+                foreach (Word word in glossary)
+                {
+                    if (word.origin == userInputWord)
+                        // FIXME 
+                        //  * Move to function in Word.cs
+                        Console.WriteLine($"English for {word.origin} is {word.translation}");
+                    if (word.translation == userInputWord)
+                        // FIXME 
+                        //  * Move to function in Word.cs
+                        Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
+                }
+            }
+            return true;
+        }
+
+        private void quit()
+        {
+
         }
     }
 }
