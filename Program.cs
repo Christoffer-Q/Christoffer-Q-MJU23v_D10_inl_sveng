@@ -1,4 +1,6 @@
-﻿namespace MJU23v_D10_inl_sveng
+﻿using static Response;
+
+namespace MJU23v_D10_inl_sveng
 {
     internal class Program
     {
@@ -7,13 +9,13 @@
         //  * Ensure the user is informed of the outcome of each action
         //  * Do not allow the user to manipulate the glossary unless it's loaded with data
 
-        private List<Word>? glossary;
-        private List<string>? commands;
+        private List<Word> glossary = new List<Word>();
+        private List<string> commands = new List<string>();
 
         public static void Main(string[] args)
         {
             Program dictionaryApplication = new Program();
-            if (dictionaryApplication.isBooted())
+            if (dictionaryApplication.isBooted().Equals(SUCCESS))
             {
                 dictionaryApplication.run();
             }
@@ -28,15 +30,15 @@
         /// <summary>
         /// Initializes the application with standard values
         /// </summary>
-        /// <returns>true if the glossary could be loaded from the file, else false.</returns>
-        private bool isBooted()
+        /// <returns>Success if the glossary could be loaded from the file, else Failed.</returns>
+        private Response isBooted()
         {
-            commands = new List<string>();
             commands.Add("load");
             commands.Add("list");
             commands.Add("new");
             commands.Add("delete");
             commands.Add("translate");
+            commands.Add("q");
             commands.Add("quit");
 
             return loadGlossary("dict/sweeng.lis");
@@ -47,10 +49,10 @@
         /// </summary>
         private void run()
         {
+            Response response = FAILED;
             Console.WriteLine("Welcome to the dictionary app!");
             do
             {
-                Console.Write("> ");
                 string userInput = readStdIn();
                 if (userInput.Equals("")) continue;
 
@@ -71,11 +73,12 @@
                 //  We can now somewhat safely extract the first argument as well
                 //  as pass arguments forward.
                 string command = arguments[0];
-                executeCommand(command, arguments);
+                response = executeCommand(command, arguments);
             }
-            //  FIXME
-            //  * Ensure we can exit the program gracefully
-            while (true);
+            while (!response.Equals(QUIT));
+
+            //  Try to exit gracefully
+            quit();
         }
 
         /// <summary>
@@ -105,6 +108,7 @@
         /// <returns>The input if valid else an empty string.</returns>
         private string readStdIn()
         {
+            Console.Write("> ");
             string input = sanitizeInput(Console.ReadLine() ?? "");
             if (input.Equals(""))
             {
@@ -132,67 +136,49 @@
         /// </summary>
         /// <param name="command"></param>
         /// <param name="arguments"></param>
-        private void executeCommand(string command, string[] arguments)
+        /// <returns>a response used to determine if we should continue, retry or quit.</returns>
+        private Response executeCommand(string command, string[] arguments)
         {
             switch (command)
             {
-                case "load":
-                    {
-                        loadGlossary(arguments);
-                        break;
-                    }
-                case "list":
-                    {
-                        listWords(arguments);
-                        break;
-                    }
-                case "new":
-                    {
-                        newWord(arguments);
-                        break;
-                    }
-                case "delete":
-                    {
-                        deleteWord(arguments);
-                        break;
-                    }
-                case "translate":
-                    {
-                        translateWord(arguments);
-                        break;
-                    }
+                case "load": return loadGlossary(arguments);
+                case "list": return listWords(arguments);
+                case "new": return newWord(arguments);
+                case "delete": return deleteWord(arguments);
+                case "translate": return translateWord(arguments);
 
-                case "quit":
-                    {
-                        Console.WriteLine("Goodbye!");
-                        break;
-                    }
+                case "q":
+                case "quit": 
+                return QUIT;
             }
+
+            return FAILED;
         }
 
         /// <summary>
         /// Loads the default file into the glossary during boot
         /// </summary>
         /// <param name="defaultFile"></param>
-        /// <returns></returns>
-        private bool loadGlossary(string defaultFile)
+        /// <returns>Success or Failed</returns>
+        private Response loadGlossary(string defaultFile)
         {
             if (isValidPath(defaultFile))
             {
                 populateGlossaryList(
                     readFileToArray(defaultFile)
                 );
-                return true;
+                return SUCCESS;
             }
-            return false;
+            
+            return FAILED;
         }
 
         /// <summary>
         /// Loads the glossary from a custom path.
         /// </summary>
         /// <param name="arguments"></param>
-        /// <returns>true if the file could be loaded into the glossary list, else false.</returns>
-        private bool loadGlossary(string[] arguments)
+        /// <returns>Success if the file could be loaded into the glossary list, else Failed.</returns>
+        private Response loadGlossary(string[] arguments)
         {
             string customPath = arguments[1];
             if (isValidPath(customPath))
@@ -200,36 +186,34 @@
                 populateGlossaryList(
                     readFileToArray(customPath)
                     );
-                return true;
+                return SUCCESS;
             }
             else
             {
                 System.Console.WriteLine("Invalid path for {0}", customPath);
-                return false;
+                return FAILED;
             }
         }
 
-        private bool listWords(string[] arguments)
+        private Response listWords(string[] arguments)
         {
-            //  FIXME
-            //  * Ensure we have something in dictionary to iterate over before we do it
             foreach (Word word in glossary)
             {
                 //  FIXME 
                 //  * Create an overloaded toString() function in Word.cs
                 Console.WriteLine($"{word.Origin,-10}  -  {word.Translation,-10}");
             }
-            return true;
+            return SUCCESS;
         }
 
-        private bool newWord(string[] arguments)
+        private Response newWord(string[] arguments)
         {
             //  FIXME
             //  Sanitize the arguments
             if (arguments.Length == 3)
             {
                 glossary.Add(new Word(arguments[1], arguments[2]));
-                return true;
+                return SUCCESS;
             }
             else if (arguments.Length == 1)
             {
@@ -238,16 +222,16 @@
                 if (word != null)
                 {
                     glossary.Add(word);
-                    return true;
+                    return SUCCESS;
                 }
 
                 //  FIXME
                 //  * Create a function updateGlossaryDatabase() to update the file
             }
-            return false;
+            return FAILED;
         }
 
-        private bool deleteWord(string[] arguments)
+        private Response deleteWord(string[] arguments)
         {
             if (arguments.Length == 3)
             {
@@ -259,6 +243,7 @@
                     if (word.Origin == arguments[1] && word.Translation == arguments[2])
                     {
                         glossary.RemoveAt(i);
+                        return SUCCESS;
                     }
                 }
             }
@@ -272,12 +257,12 @@
 
             //  FIXME    
             //  * Call updateGlossaryDatabase()
-            return true;
+            return FAILED;
         }
 
-        private bool translateWord(string[] arguments)
+        private Response translateWord(string[] arguments)
         {
-            bool hasMatch = false;
+            Response hasMatch = FAILED;
             if (arguments.Length == 2)
             {
                 foreach (Word word in glossary)
@@ -285,12 +270,12 @@
                     if (word.Origin == arguments[1])
                     {
                         word.printTranslation();
-                        hasMatch = true;
+                        hasMatch = SUCCESS;
                     }
                     if (word.Translation == arguments[1])
                     {
                         word.printOrigin();
-                        hasMatch = true;
+                        hasMatch = SUCCESS;
                     }
                 }
             }
@@ -303,17 +288,19 @@
                     if (word.Origin == userInputWord)
                     {
                         word.printTranslation();
-                        hasMatch = true;
+                        hasMatch = SUCCESS;
+
                     }
                     if (word.Translation == userInputWord)
                     {
                         word.printOrigin();
-                        hasMatch = true;
+                        hasMatch = SUCCESS;
+
                     }
                 }
             }
 
-            if (!hasMatch)
+            if (hasMatch.Equals(FAILED))
             {
                 System.Console.WriteLine("No match found in dictionary!");
             }
@@ -323,7 +310,7 @@
 
         private void quit()
         {
-
+            System.Console.WriteLine("Goodbye!");
         }
 
         /// <summary>
@@ -334,9 +321,11 @@
         {
             foreach (string entry in data)
             {
-                //  FIXME
-                //  We should first sanitize and validate the entry
-                glossary.Add(new Word(entry));
+                string sanitizedEntry = sanitizeInput(entry);
+                if (!sanitizedEntry.Equals(""))
+                {
+                glossary.Add(new Word(sanitizedEntry));
+                }
             }
         }
 
@@ -414,7 +403,7 @@
             string origin = readStdIn();
             if (origin.Equals("")) return null;
 
-            Console.Write("Write word in English: ");
+            Console.WriteLine("Write word in English: ");
             string translation = readStdIn();
             if (translation.Equals("")) return null;
 
