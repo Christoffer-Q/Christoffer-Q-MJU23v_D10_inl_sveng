@@ -17,4 +17,14 @@ public class Word
         string[] words = line.Split('|');
         this.Origin = words[0]; this.Translation = words[1];
     }
+
+    public void printTranslation()
+    {
+        Console.WriteLine($"English for {this.Origin} is {this.Translation}");
+    }
+
+    public void printOrigin()
+    {
+        Console.WriteLine($"Swedish for {this.Translation} is {this.Origin}");
+    }
 }
