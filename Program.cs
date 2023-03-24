@@ -52,6 +52,7 @@ namespace MJU23v_D10_inl_sveng
         {
             Response response = FAILED;
             Console.WriteLine("Welcome to the dictionary app!");
+            printHelp();
             do
             {
                 string userInput = readStdIn();
@@ -114,7 +115,6 @@ namespace MJU23v_D10_inl_sveng
         }
 
         private Response printHelp(string[] arguments) {
-            System.Console.WriteLine("These are the following commands:");
             System.Console.WriteLine("help - shows this list of commands.");
             System.Console.WriteLine("load - loads a text file into memory.");
             System.Console.WriteLine("list - list all the words in the dictionary.");
