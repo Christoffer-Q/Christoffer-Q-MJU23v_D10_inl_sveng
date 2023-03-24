@@ -7,7 +7,8 @@
         //  * Ensure the user is informed of the outcome of each action
         //  * Do not allow the user to manipulate the glossary unless it's loaded with data
 
-        private List<Word> glossary;
+        private List<Word>? glossary;
+        private List<string>? commands;
 
         public static void Main(string[] args)
         {
@@ -30,6 +31,14 @@
         /// <returns>true if the glossary could be loaded from the file, else false.</returns>
         private bool isBooted()
         {
+            commands = new List<string>();
+            commands.Add("load");
+            commands.Add("list");
+            commands.Add("new");
+            commands.Add("delete");
+            commands.Add("translate");
+            commands.Add("quit");
+
             return loadGlossary("dict/sweeng.lis");
         }
 
@@ -38,17 +47,29 @@
         /// </summary>
         private void run()
         {
-            //  FIXME
-            //  * Ensure we can read this path
             Console.WriteLine("Welcome to the dictionary app!");
             do
             {
                 Console.Write("> ");
+                string userInput = readStdIn();
+                if (userInput.Equals("")) continue;
 
-                //  FIXME
-                //  * Sanitize the input and make it lower case, create new function for it
-                //  * Add a new variable to track the length of the arguments array
-                string[] arguments = Console.ReadLine().Split();
+                string[] arguments = userInput.Split();
+                if (!hasValidArgument(arguments))
+                {
+                    if (arguments.Length != 0)
+                    {
+                        Console.WriteLine("Unknown command: '{0}'", arguments[0]);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Missing arguments");
+                    }
+                    continue;
+                }
+
+                //  We can now somewhat safely extract the first argument as well
+                //  as pass arguments forward.
                 string command = arguments[0];
                 executeCommand(command, arguments);
             }
@@ -57,6 +78,60 @@
             while (true);
         }
 
+        /// <summary>
+        /// Ensure that at least the first argument is a valid command.
+        /// </summary>
+        /// <param name="arguments">User input</param>
+        /// <returns>true if the first argument exists in the list of commands, else false.</returns>
+        private bool hasValidArgument(string[] arguments)
+        {
+            if (hasValue(arguments))
+            {
+                foreach (string argument in arguments)
+                {
+                    if (commands.Contains(sanitizeInput(argument)))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Reads data from standard input and tries to sanitize and validate it.
+        /// </summary>
+        /// <returns>The input if valid else an empty string.</returns>
+        private string readStdIn()
+        {
+            string input = sanitizeInput(Console.ReadLine() ?? "");
+            if (input.Equals(""))
+            {
+                System.Console.WriteLine("You need to write something!");
+            }
+            return input;
+        }
+
+        /// <summary>
+        /// Removes any whitespaces and ensure lowercase.
+        /// </summary>
+        /// <param name="input">Any given input.</param>
+        /// <returns>The sanitized input.</returns>
+        private string sanitizeInput(string input)
+        {
+            if (hasValue(input))
+            {
+                return input.Trim().ToLower();
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// Executes a validated command from the user.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="arguments"></param>
         private void executeCommand(string command, string[] arguments)
         {
             switch (command)
@@ -90,11 +165,6 @@
                 case "quit":
                     {
                         Console.WriteLine("Goodbye!");
-                        break;
-                    }
-                default:
-                    {
-                        Console.WriteLine($"Unknown command: '{command}'");
                         break;
                     }
             }
@@ -154,26 +224,27 @@
 
         private bool newWord(string[] arguments)
         {
+            //  FIXME
+            //  Sanitize the arguments
             if (arguments.Length == 3)
             {
                 glossary.Add(new Word(arguments[1], arguments[2]));
+                return true;
             }
             else if (arguments.Length == 1)
             {
-                Console.WriteLine("Write word in Swedish: ");
-                //  FIXME
-                //  * Move this to function readStdIn()
-                string origin = Console.ReadLine();
-                Console.Write("Write word in English: ");
-                //  FIXME
-                //  * Move this to function readStdIn()
-                string translation = Console.ReadLine();
-                glossary.Add(new Word(origin, translation));
+
+                Word? word = convertUserInputToWordObject();
+                if (word != null)
+                {
+                    glossary.Add(word);
+                    return true;
+                }
 
                 //  FIXME
                 //  * Create a function updateGlossaryDatabase() to update the file
             }
-            return true;
+            return false;
         }
 
         private bool deleteWord(string[] arguments)
@@ -193,8 +264,7 @@
             }
             else if (arguments.Length == 1)
             {
-                //  FIXME
-                //  * Call function readStdIn()
+                Word? word = convertUserInputToWordObject();
 
                 //  FIXME
                 //  * Call function removeGlossary()
@@ -207,43 +277,48 @@
 
         private bool translateWord(string[] arguments)
         {
+            bool hasMatch = false;
             if (arguments.Length == 2)
             {
-                //  FIXME
-                //  * Ensure we have something in dictionary to iterate over before we do it
                 foreach (Word word in glossary)
                 {
                     if (word.Origin == arguments[1])
-                        // FIXME 
-                        //  * Move to function in Word.cs
-                        Console.WriteLine($"English for {word.Origin} is {word.Translation}");
+                    {
+                        word.printTranslation();
+                        hasMatch = true;
+                    }
                     if (word.Translation == arguments[1])
-                        // FIXME 
-                        //  * Move to function in Word.cs
-                        Console.WriteLine($"Swedish for {word.Translation} is {word.Origin}");
+                    {
+                        word.printOrigin();
+                        hasMatch = true;
+                    }
                 }
             }
             else if (arguments.Length == 1)
             {
                 Console.WriteLine("Write word to be translated: ");
-                //  FIXME
-                //  * Move this to function readStdIn()
-                string userInputWord = Console.ReadLine();
-                //  FIXME
-                //  * Ensure we have something in dictionary to iterate over before we do it
+                string userInputWord = readStdIn();
                 foreach (Word word in glossary)
                 {
                     if (word.Origin == userInputWord)
-                        // FIXME 
-                        //  * Move to function in Word.cs
-                        Console.WriteLine($"English for {word.Origin} is {word.Translation}");
+                    {
+                        word.printTranslation();
+                        hasMatch = true;
+                    }
                     if (word.Translation == userInputWord)
-                        // FIXME 
-                        //  * Move to function in Word.cs
-                        Console.WriteLine($"Swedish for {word.Translation} is {word.Origin}");
+                    {
+                        word.printOrigin();
+                        hasMatch = true;
+                    }
                 }
             }
-            return true;
+
+            if (!hasMatch)
+            {
+                System.Console.WriteLine("No match found in dictionary!");
+            }
+
+            return hasMatch;
         }
 
         private void quit()
@@ -305,14 +380,14 @@
         /// Checks if the variable contains a value.
         /// </summary>
         /// <param name="variable">Any data type.</param>
-        /// <returns>true as long as the param has a value seperated from null and empty.</returns>
+        /// <returns>true as long as the param has a value seperated from null, empty and new line character.</returns>
         private bool hasValue(object variable)
         {
             if (variable != null)
             {
                 if (Type.GetTypeCode(variable.GetType()).Equals(TypeCode.String))
                 {
-                    return !variable.Equals("");
+                    return !variable.Equals("") && !variable.Equals(Environment.NewLine);
                 }
 
                 if (variable.GetType().IsArray)
@@ -327,6 +402,23 @@
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Prompts the user to add origin and translation.
+        /// </summary>
+        /// <returns>A new Word object.</returns>
+        private Word? convertUserInputToWordObject()
+        {
+            Console.WriteLine("Write word in Swedish: ");
+            string origin = readStdIn();
+            if (origin.Equals("")) return null;
+
+            Console.Write("Write word in English: ");
+            string translation = readStdIn();
+            if (translation.Equals("")) return null;
+
+            return new Word(origin, translation);
         }
     }
 }
