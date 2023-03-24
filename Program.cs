@@ -74,61 +74,17 @@ namespace MJU23v_D10_inl_sveng
                 //  as pass arguments forward.
                 string command = arguments[0];
                 response = executeCommand(command, arguments);
+
+                if (response.Equals(FAILED)) 
+                {
+                    System.Console.WriteLine("Failed to execute the command: {0}, returning to main menu.", command);
+                    continue;
+                }
             }
             while (!response.Equals(QUIT));
 
             //  Try to exit gracefully
             quit();
-        }
-
-        /// <summary>
-        /// Ensure that at least the first argument is a valid command.
-        /// </summary>
-        /// <param name="arguments">User input</param>
-        /// <returns>true if the first argument exists in the list of commands, else false.</returns>
-        private bool hasValidArgument(string[] arguments)
-        {
-            if (hasValue(arguments))
-            {
-                foreach (string argument in arguments)
-                {
-                    if (commands.Contains(sanitizeInput(argument)))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Reads data from standard input and tries to sanitize and validate it.
-        /// </summary>
-        /// <returns>The input if valid else an empty string.</returns>
-        private string readStdIn()
-        {
-            Console.Write("> ");
-            string input = sanitizeInput(Console.ReadLine() ?? "");
-            if (input.Equals(""))
-            {
-                System.Console.WriteLine("You need to write something!");
-            }
-            return input;
-        }
-
-        /// <summary>
-        /// Removes any whitespaces and ensure lowercase.
-        /// </summary>
-        /// <param name="input">Any given input.</param>
-        /// <returns>The sanitized input.</returns>
-        private string sanitizeInput(string input)
-        {
-            if (hasValue(input))
-            {
-                return input.Trim().ToLower();
-            }
-            return "";
         }
 
         /// <summary>
@@ -169,7 +125,7 @@ namespace MJU23v_D10_inl_sveng
                 );
                 return SUCCESS;
             }
-            
+
             return FAILED;
         }
 
@@ -353,6 +309,56 @@ namespace MJU23v_D10_inl_sveng
                 System.Console.WriteLine(exception.ToString());
             }
             return new string[] { "" };
+        }
+
+        /// <summary>
+        /// Ensure that at least the first argument is a valid command.
+        /// </summary>
+        /// <param name="arguments">User input</param>
+        /// <returns>true if the first argument exists in the list of commands, else false.</returns>
+        private bool hasValidArgument(string[] arguments)
+        {
+            if (hasValue(arguments))
+            {
+                foreach (string argument in arguments)
+                {
+                    if (commands.Contains(sanitizeInput(argument)))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Reads data from standard input and tries to sanitize and validate it.
+        /// </summary>
+        /// <returns>The input if valid else an empty string.</returns>
+        private string readStdIn()
+        {
+            Console.Write("> ");
+            string input = sanitizeInput(Console.ReadLine() ?? "");
+            if (input.Equals(""))
+            {
+                System.Console.WriteLine("You need to write something!");
+            }
+            return input;
+        }
+
+        /// <summary>
+        /// Removes any whitespaces and ensure lowercase.
+        /// </summary>
+        /// <param name="input">Any given input.</param>
+        /// <returns>The sanitized input.</returns>
+        private string sanitizeInput(string input)
+        {
+            if (hasValue(input))
+            {
+                return input.Trim().ToLower();
+            }
+            return "";
         }
 
         /// <summary>
