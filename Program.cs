@@ -2,59 +2,94 @@
 {
     internal class Program
     {
-        static List<SweEngGloss> dictionary;
-        class SweEngGloss
+        //  FIXME GLOBAL
+        //  * Add 'help' as an option for the user
+        //  * Ensure the user is informed of the outcome of each action
+        //  * Do not allow the user to manipulate the glossary unless it's loaded with data
+
+        //  FIXME
+        //  * Remove static and narrow the access modifier to private
+        static List<Word> glossary;
+
+        //  FIXME
+        //  * Move class to file
+        class Word
         {
-            public string word_swe, word_eng;
-            public SweEngGloss(string word_swe, string word_eng)
+            //  FIXME 
+            //  * Narrow access modifier to private
+            //  * Add getters and setters
+            public string origin, translation;
+
+            public Word(string origin, string translation)
             {
-                this.word_swe = word_swe; this.word_eng = word_eng;
+                this.origin = origin;
+                this.translation = translation;
             }
-            public SweEngGloss(string line)
+
+            //  FIXME
+            //  * Move the logic to the read file function instead
+            //  * Remove this constructor
+            public Word(string line)
             {
                 string[] words = line.Split('|');
-                this.word_swe = words[0]; this.word_eng = words[1];
+                this.origin = words[0]; this.translation = words[1];
             }
         }
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            string defaultFile = "..\\..\\..\\dict\\sweeng.lis";
+            //  FIXME
+            //  * Move most of the logic into a run() function
+            //  FIXME
+            //  * Ensure we can read this path
+            string defaultFile = "dict/sweeng.lis";
             Console.WriteLine("Welcome to the dictionary app!");
             do
             {
                 Console.Write("> ");
-                string[] argument = Console.ReadLine().Split();
-                string command = argument[0];
+
+                //  FIXME
+                //  * Sanitize the input and make it lower case, create new function for it
+                //  * Add a new variable to track the length of the arguments array
+                string[] arguments = Console.ReadLine().Split();
+                string command = arguments[0];
+                //  FIXME
+                //  * Replace the if-statements with a switch
                 if (command == "quit")
                 {
                     Console.WriteLine("Goodbye!");
                 }
                 else if (command == "load")
                 {
-                    if(argument.Length == 2)
+                    if (arguments.Length == 2)
                     {
-                        using (StreamReader sr = new StreamReader(argument[1]))
+                        //  FIXME
+                        //  * Move file reading into its own function called populateGlossaryList()
+                        //  * Make sure that arguments[1] is a valid path
+                        using (StreamReader sr = new StreamReader(arguments[1]))
                         {
-                            dictionary = new List<SweEngGloss>(); // Empty it!
+                            glossary = new List<Word>();
                             string line = sr.ReadLine();
                             while (line != null)
                             {
-                                SweEngGloss gloss = new SweEngGloss(line);
-                                dictionary.Add(gloss);
+                                Word word = new Word(line);
+                                glossary.Add(word);
                                 line = sr.ReadLine();
                             }
                         }
                     }
-                    else if(argument.Length == 1)
+                    else if (arguments.Length == 1)
                     {
+                        //  FIXME
+                        //  * Call function populateGlossaryList()
+                        //  * Make sure to pass the defaultFile
                         using (StreamReader sr = new StreamReader(defaultFile))
                         {
-                            dictionary = new List<SweEngGloss>(); // Empty it!
+                            glossary = new List<Word>();
                             string line = sr.ReadLine();
                             while (line != null)
                             {
-                                SweEngGloss gloss = new SweEngGloss(line);
-                                dictionary.Add(gloss);
+                                Word word = new Word(line);
+                                glossary.Add(word);
                                 line = sr.ReadLine();
                             }
                         }
@@ -62,76 +97,100 @@
                 }
                 else if (command == "list")
                 {
-                    foreach(SweEngGloss gloss in dictionary)
+                    //  FIXME
+                    //  * Ensure we have something in dictionary to iterate over before we do it
+                    foreach (Word word in glossary)
                     {
-                        Console.WriteLine($"{gloss.word_swe,-10}  - {gloss.word_eng,-10}");
+                        //  FIXME 
+                        //  * Create an overloaded toString() function in Word.cs
+                        Console.WriteLine($"{word.origin,-10}  -  {word.translation,-10}");
                     }
                 }
                 else if (command == "new")
                 {
-                    if (argument.Length == 3)
+                    if (arguments.Length == 3)
                     {
-                        dictionary.Add(new SweEngGloss(argument[1], argument[2]));
+                        glossary.Add(new Word(arguments[1], arguments[2]));
                     }
-                    else if(argument.Length == 1)
+                    else if (arguments.Length == 1)
                     {
                         Console.WriteLine("Write word in Swedish: ");
+                        //  FIXME
+                        //  * Move this to function readStdIn()
                         string s = Console.ReadLine();
                         Console.Write("Write word in English: ");
+                        //  FIXME
+                        //  * Move this to function readStdIn()
                         string e = Console.ReadLine();
-                        dictionary.Add(new SweEngGloss(s, e));
+                        glossary.Add(new Word(s, e));
+
+                        //  FIXME
+                        //  * Create a function updateGlossaryDatabase() to update the file
                     }
                 }
                 else if (command == "delete")
                 {
-                    if (argument.Length == 3)
+                    if (arguments.Length == 3)
                     {
-                        int index = -1;
-                        for (int i = 0; i < dictionary.Count; i++) {
-                            SweEngGloss gloss = dictionary[i];
-                            if (gloss.word_swe == argument[1] && gloss.word_eng == argument[2])
-                                index = i;
-                        }
-                        dictionary.RemoveAt(index);
-                    }
-                    else if (argument.Length == 1)
-                    {
-                        Console.WriteLine("Write word in Swedish: ");
-                        string s = Console.ReadLine();
-                        Console.Write("Write word in English: ");
-                        string e = Console.ReadLine();
-                        int index = -1;
-                        for (int i = 0; i < dictionary.Count; i++)
+                        //  FIXME
+                        //  * Move this to function removeGlossary()
+                        for (int i = 0; i < glossary.Count; i++)
                         {
-                            SweEngGloss gloss = dictionary[i];
-                            if (gloss.word_swe == s && gloss.word_eng == e)
-                                index = i;
+                            Word word = glossary[i];
+                            if (word.origin == arguments[1] && word.translation == arguments[2])
+                            {
+                                glossary.RemoveAt(i);
+                            }
                         }
-                        dictionary.RemoveAt(index);
                     }
+                    else if (arguments.Length == 1)
+                    {
+                        //  FIXME
+                        //  * Call function readStdIn()
+
+                        //  FIXME
+                        //  * Call function removeGlossary()
+                    }
+
+                    //  FIXME    
+                    //  * Call updateGlossaryDatabase()
                 }
                 else if (command == "translate")
                 {
-                    if (argument.Length == 2)
+                    if (arguments.Length == 2)
                     {
-                        foreach(SweEngGloss gloss in dictionary)
+                        //  FIXME
+                        //  * Ensure we have something in dictionary to iterate over before we do it
+                        foreach (Word word in glossary)
                         {
-                            if (gloss.word_swe == argument[1])
-                                Console.WriteLine($"English for {gloss.word_swe} is {gloss.word_eng}");
-                            if (gloss.word_eng == argument[1])
-                                Console.WriteLine($"Swedish for {gloss.word_eng} is {gloss.word_swe}");
+                            if (word.origin == arguments[1])
+                                // FIXME 
+                                //  * Move to function in Word.cs
+                                Console.WriteLine($"English for {word.origin} is {word.translation}");
+                            if (word.translation == arguments[1])
+                                // FIXME 
+                                //  * Move to function in Word.cs
+                                Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
                         }
                     }
-                    else if (argument.Length == 1)
+                    else if (arguments.Length == 1)
                     {
                         Console.WriteLine("Write word to be translated: ");
+                        //  FIXME
+                        //  * Move this to function readStdIn()
                         string s = Console.ReadLine();
-                        foreach (SweEngGloss gloss in dictionary)
+                        //  FIXME
+                        //  * Ensure we have something in dictionary to iterate over before we do it
+                        foreach (Word word in glossary)
                         {
-                            if (gloss.word_swe == s)
-                                Console.WriteLine($"English for {gloss.word_swe} is {gloss.word_eng}");
-                            if (gloss.word_eng == s)
-                                Console.WriteLine($"Swedish for {gloss.word_eng} is {gloss.word_swe}");
+                            if (word.origin == s)
+                                // FIXME 
+                                //  * Move to function in Word.cs
+                                Console.WriteLine($"English for {word.origin} is {word.translation}");
+                            if (word.translation == s)
+                                // FIXME 
+                                //  * Move to function in Word.cs
+                                Console.WriteLine($"Swedish for {word.translation} is {word.origin}");
                         }
                     }
                 }
@@ -140,6 +199,8 @@
                     Console.WriteLine($"Unknown command: '{command}'");
                 }
             }
+            //  FIXME
+            //  * Ensure we can exit the program gracefully
             while (true);
         }
     }
