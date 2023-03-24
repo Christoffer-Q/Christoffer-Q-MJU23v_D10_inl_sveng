@@ -5,7 +5,6 @@ namespace MJU23v_D10_inl_sveng
     internal class Program
     {
         //  FIXME GLOBAL
-        //  * Add 'help' as an option for the user
         //  * Ensure the user is informed of the outcome of each action
         //  * Add one dictionary for each language and place them in a dictonary. Use keys to access the correct language.
 
