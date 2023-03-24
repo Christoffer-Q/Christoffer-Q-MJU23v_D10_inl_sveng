@@ -33,6 +33,7 @@ namespace MJU23v_D10_inl_sveng
         /// <returns>Success if the glossary could be loaded from the file, else Failed.</returns>
         private Response isBooted()
         {
+            commands.Add("help");
             commands.Add("load");
             commands.Add("list");
             commands.Add("new");
@@ -51,6 +52,7 @@ namespace MJU23v_D10_inl_sveng
         {
             Response response = FAILED;
             Console.WriteLine("Welcome to the dictionary app!");
+            printHelp();
             do
             {
                 string userInput = readStdIn();
@@ -97,6 +99,7 @@ namespace MJU23v_D10_inl_sveng
         {
             switch (command)
             {
+                case "help": return printHelp(arguments);
                 case "load": return loadGlossary(arguments);
                 case "list": return listWords(arguments);
                 case "new": return newWord(arguments);
@@ -109,6 +112,17 @@ namespace MJU23v_D10_inl_sveng
             }
 
             return FAILED;
+        }
+
+        private Response printHelp(string[] arguments) {
+            System.Console.WriteLine("help - shows this list of commands.");
+            System.Console.WriteLine("load - loads a text file into memory.");
+            System.Console.WriteLine("list - list all the words in the dictionary.");
+            System.Console.WriteLine("new - creates a new word and adds it to the dictionary.");
+            System.Console.WriteLine("delete - removes any give word from the dictionary.");
+            System.Console.WriteLine("translate - shows the translation of any given word in the dictionary.");
+            System.Console.WriteLine("q / quit - stops the application.");
+            return SUCCESS;
         }
 
         /// <summary>
