@@ -8,10 +8,15 @@ namespace MJU23v_D10_inl_sveng
         //  * Ensure the user is informed of the outcome of each action
         //  * Add one dictionary for each language and place them in a dictonary. Use keys to access the correct language.
         //  * Add NUnit tests
-        //  * Create a function to update the file
 
         private List<Word> glossary = new List<Word>();
         private List<string> commands = new List<string>();
+
+        //  We initialize an array to be able to reuse it later.
+        //  For now we only want the second index to have the default path
+        //  to our glossary file.
+        private readonly string defaultGlossaryFile = "dict/sweeng.lis";
+        private readonly string lastUsedGlossaryFile = "dict/glossary_backup.lis";
 
         public static void Main(string[] args)
         {
@@ -38,10 +43,25 @@ namespace MJU23v_D10_inl_sveng
             commands.Add("new");
             commands.Add("delete");
             commands.Add("translate");
+            commands.Add("save");
+            commands.Add("exit");
             commands.Add("q");
             commands.Add("quit");
 
-            return loadGlossary("dict/sweeng.lis");
+            if (!isValidPath(defaultGlossaryFile))
+            {
+                System.Console.WriteLine("Failed to load default glossary file {0}.", defaultGlossaryFile);
+                return FAILED;
+            }
+
+            //  We pass an empty string array since we don't want to 
+            //  overload the function and create duplicate code.
+            if (loadGlossary(new string[] { }).Equals(FAILED))
+            {
+                System.Console.WriteLine("Unable to load glossary into memory during boot.");
+            }
+
+            return SUCCESS;
         }
 
         /// <summary>
@@ -51,14 +71,24 @@ namespace MJU23v_D10_inl_sveng
         {
             Response response = FAILED;
             Console.WriteLine("Welcome to the dictionary app!");
-            printHelp();
+            System.Console.WriteLine("Would you like to load unsaved data? y/n");
+            string userInput = readStdIn();
+            if (userInput.Equals("y") || userInput.Equals("yes"))
+            {
+                if (populateGlossaryList(readFileToArray(lastUsedGlossaryFile)).Equals(FAILED))
+                {
+                    System.Console.WriteLine("Failed to load unsaved data.");
+                }
+            }
+
+
             do
             {
-                string userInput = readStdIn();
+                userInput = readStdIn();
                 if (userInput.Equals("")) continue;
 
                 string[] arguments = userInput.Split();
-                if (!hasValidArgument(arguments))
+                if (!isValidCommand(arguments))
                 {
                     if (arguments.Length != 0)
                     {
@@ -104,7 +134,9 @@ namespace MJU23v_D10_inl_sveng
                 case "new": return newWord(arguments);
                 case "delete": return deleteWord(arguments);
                 case "translate": return translateWord(arguments);
+                case "save": return updateFile(arguments);
 
+                case "exit":
                 case "q":
                 case "quit":
                     return QUIT;
@@ -122,26 +154,10 @@ namespace MJU23v_D10_inl_sveng
             System.Console.WriteLine("new - creates a new word and adds it to the dictionary.");
             System.Console.WriteLine("delete - removes any give word from the dictionary.");
             System.Console.WriteLine("translate - shows the translation of any given word in the dictionary.");
-            System.Console.WriteLine("q / quit - stops the application.");
-            
+            System.Console.WriteLine("save - saves the glossary list in memory to file.");
+            System.Console.WriteLine("exit / q / quit - stops the application.");
+
             return SUCCESS;
-        }
-
-        /// <summary>
-        /// Loads the default file into the glossary during boot
-        /// </summary>
-        /// <param name="defaultFile"></param>
-        /// <returns>Success or Failed</returns>
-        private Response loadGlossary(string defaultFile)
-        {
-            if (isValidPath(defaultFile))
-            {
-                return populateGlossaryList(
-                    readFileToArray(defaultFile)
-                );
-            }
-
-            return FAILED;
         }
 
         /// <summary>
@@ -151,20 +167,27 @@ namespace MJU23v_D10_inl_sveng
         /// <returns>Success if the file could be loaded into the glossary list, else Failed.</returns>
         private Response loadGlossary(string[] arguments)
         {
-            string customPath = arguments[1];
-            if (isValidPath(customPath))
+            if (arguments.Length == 2)
             {
-                return populateGlossaryList(
-                    readFileToArray(customPath)
-                    );
-            }
-            else
-            {
-                System.Console.WriteLine("Invalid path for {0}", customPath);
+                string path = arguments[1];
+                if (isValidPath(path))
+                {
+                    return populateGlossaryList(
+                        readFileToArray(path)
+                        );
+                }
+                else
+                {
+                    System.Console.WriteLine("Invalid path for {0}", path);
+                }
             }
 
-            return FAILED;
-
+            //  At this point we either want to pre-load the data or
+            //  the user has not added a second argument to 'load' and
+            //  therefore we don't care about the number of arguments.
+            return populateGlossaryList(
+                        readFileToArray(defaultGlossaryFile)
+                        );
         }
 
         // FIXME document this
@@ -207,10 +230,10 @@ namespace MJU23v_D10_inl_sveng
                 Word? word = null;
                 if (arguments.Length == 1)
                     word = convertUserInputToWordObject();
-                
+
                 if (arguments.Length == 3)
                     word = glossary[i];
-                
+
                 if (word == null)
                     return FAILED;
 
@@ -271,9 +294,34 @@ namespace MJU23v_D10_inl_sveng
             return isTranslated;
         }
 
+        private Response updateFile(string[] arguments)
+        {
+            if (arguments.Length == 1)
+            {
+                return writeGlossaryToFile(defaultGlossaryFile);
+            }
+
+            if (arguments.Length == 2)
+            {
+                string path = arguments[1];
+                if (isValidPath(path))
+                {
+                    return writeGlossaryToFile(path);
+                }
+                else
+                {
+                    System.Console.WriteLine("Invalid path.");
+                }
+            }
+
+            return FAILED;
+        }
+
         //  FIXME document this
         private void quit()
         {
+            //  We make sure to backup any unsaved data.
+            writeGlossaryToFile(lastUsedGlossaryFile);
             System.Console.WriteLine("Goodbye!");
         }
 
@@ -283,6 +331,7 @@ namespace MJU23v_D10_inl_sveng
         /// <param name="data"></param>
         private Response populateGlossaryList(string[] data)
         {
+            glossary = new List<Word>();
             foreach (string entry in data)
             {
                 string[] words = entry.Split('|');
@@ -326,12 +375,37 @@ namespace MJU23v_D10_inl_sveng
             return new string[] { "" };
         }
 
+        private Response writeGlossaryToFile(string path)
+        {
+            try
+            {
+                using (StreamWriter streamWriter = new StreamWriter(path))
+                {
+                    foreach (Word word in glossary)
+                    {
+                        streamWriter.Write(
+                            word.Origin + "|" + word.Translation + Environment.NewLine
+                            );
+                    }
+                    streamWriter.Close();
+                }
+                System.Console.WriteLine("Glossary file {0} updated!", path);
+            }
+            catch (System.Exception exception)
+            {
+                System.Console.WriteLine(exception.ToString());
+                return FAILED;
+            }
+
+            return SUCCESS;
+        }
+
         /// <summary>
         /// Ensure that at least the first argument is a valid command.
         /// </summary>
         /// <param name="arguments">User input</param>
         /// <returns>true if the first argument exists in the list of commands, else false.</returns>
-        private bool hasValidArgument(string[] arguments)
+        private bool isValidCommand(string[] arguments)
         {
             if (hasValue(arguments))
             {
@@ -385,7 +459,9 @@ namespace MJU23v_D10_inl_sveng
         /// <returns>true if the file exists else false</returns>
         private bool isValidPath(string path)
         {
-            return File.Exists(path);
+            return
+            Uri.IsWellFormedUriString(path, UriKind.RelativeOrAbsolute) ||
+            File.Exists(path);
         }
 
         /// <summary>
