@@ -369,7 +369,7 @@ namespace MJU23v_D10_inl_sveng
             }
             catch (Exception exception)
             {
-                System.Console.WriteLine(exception.ToString());
+                handleException(exception);
             }
 
             return new string[] { "" };
@@ -377,24 +377,33 @@ namespace MJU23v_D10_inl_sveng
 
         private Response writeGlossaryToFile(string path)
         {
+            StreamWriter? streamWriter = null;
             try
             {
-                using (StreamWriter streamWriter = new StreamWriter(path))
+                streamWriter = new StreamWriter(path);
+                foreach (Word word in glossary)
                 {
-                    foreach (Word word in glossary)
-                    {
-                        streamWriter.Write(
-                            word.Origin + "|" + word.Translation + Environment.NewLine
-                            );
-                    }
-                    streamWriter.Close();
+                    streamWriter.Write(
+                        word.Origin + "|" + word.Translation + Environment.NewLine
+                        );
                 }
                 System.Console.WriteLine("Glossary file {0} updated!", path);
             }
             catch (System.Exception exception)
             {
-                System.Console.WriteLine(exception.ToString());
+                handleException(exception);
+                if (streamWriter != null)
+                {
+                    streamWriter.Close();
+                }
                 return FAILED;
+            }
+            finally
+            {
+                if (streamWriter != null)
+                {
+                    streamWriter.Close();
+                }
             }
 
             return SUCCESS;
@@ -419,6 +428,74 @@ namespace MJU23v_D10_inl_sveng
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Handle the most common exceptions for IO. If some else Exception
+        /// is caught we handle it as a generic exception
+        /// </summary>
+        /// <param name="exception">THe exception caught.</param>
+        private void handleException(Exception exception)
+        {
+            switch (exception.GetType().ToString())
+            {
+
+                case "System.IOException":
+                    {
+                        IOException iOException =
+                        (IOException) exception;
+                        System.Console.WriteLine(iOException.ToString());
+                        break;
+                    }
+                case "System.ArgumentException":
+                    {
+                        ArgumentException argumentException =
+                        (ArgumentException) exception;
+                        System.Console.WriteLine(argumentException.ToString());
+                        break;
+                    }
+                case "System.ArgumentNullException":
+                    {
+                        ArgumentNullException argumentNullException =
+                        (ArgumentNullException) exception;
+                        System.Console.WriteLine(argumentNullException.ToString());
+                        break;
+                    }
+                case "System.PathTooLongException":
+                    {
+                        PathTooLongException pathTooLongException =
+                        (PathTooLongException) exception;
+                        System.Console.WriteLine(pathTooLongException.ToString());
+                        break;
+                    }
+                case "System.DirectoryNotFoundException":
+                    {
+                        DirectoryNotFoundException directoryNotFoundException =
+                        (DirectoryNotFoundException) exception;
+                        System.Console.WriteLine(directoryNotFoundException.ToString());
+                        break;
+                    }
+                case "System.UnauthorizedAccessException":
+                    {
+                        UnauthorizedAccessException unauthorizedAccessException =
+                        (UnauthorizedAccessException) exception;
+                        System.Console.WriteLine(unauthorizedAccessException.ToString());
+                        break;
+                    }
+                case "System.FileNotFoundException":
+                    {
+                        FileNotFoundException fileNotFoundException =
+                        (FileNotFoundException) exception;
+                        System.Console.WriteLine(fileNotFoundException.ToString());
+                        break;
+                    }
+
+                default:
+                    {
+                        Console.WriteLine(exception.ToString());
+                        break;
+                    }
+            }
         }
 
         /// <summary>
