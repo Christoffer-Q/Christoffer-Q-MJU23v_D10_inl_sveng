@@ -16,6 +16,7 @@ namespace MJU23v_D10_inl_sveng
         //  For now we only want the second index to have the default path
         //  to our glossary file.
         private readonly string defaultGlossaryFile = "dict/sweeng.lis";
+        private readonly string lastUsedGlossaryFile = "dict/glossary_backup.lis";
 
         public static void Main(string[] args)
         {
@@ -70,10 +71,20 @@ namespace MJU23v_D10_inl_sveng
         {
             Response response = FAILED;
             Console.WriteLine("Welcome to the dictionary app!");
-            printHelp();
+            System.Console.WriteLine("Would you like to load unsaved data? y/n");
+            string userInput = readStdIn();
+            if (userInput.Equals("y") || userInput.Equals("yes"))
+            {
+                if (populateGlossaryList(readFileToArray(lastUsedGlossaryFile)).Equals(FAILED))
+                {
+                    System.Console.WriteLine("Failed to load unsaved data.");
+                }
+            }
+
+
             do
             {
-                string userInput = readStdIn();
+                userInput = readStdIn();
                 if (userInput.Equals("")) continue;
 
                 string[] arguments = userInput.Split();
@@ -287,7 +298,7 @@ namespace MJU23v_D10_inl_sveng
         {
             if (arguments.Length == 1)
             {
-                return writeGlossaryToFile(arguments[1]);
+                return writeGlossaryToFile(defaultGlossaryFile);
             }
 
             if (arguments.Length == 2)
@@ -309,6 +320,8 @@ namespace MJU23v_D10_inl_sveng
         //  FIXME document this
         private void quit()
         {
+            //  We make sure to backup any unsaved data.
+            writeGlossaryToFile(lastUsedGlossaryFile);
             System.Console.WriteLine("Goodbye!");
         }
 
