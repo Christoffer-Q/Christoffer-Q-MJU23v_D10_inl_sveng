@@ -8,6 +8,7 @@ namespace MJU23v_D10_inl_sveng
         //  * Ensure the user is informed of the outcome of each action
         //  * Add one dictionary for each language and place them in a dictonary. Use keys to access the correct language.
         //  * Add NUnit tests
+        //  * Create a function to update the file
 
         private List<Word> glossary = new List<Word>();
         private List<string> commands = new List<string>();
@@ -23,8 +24,6 @@ namespace MJU23v_D10_inl_sveng
             {
                 System.Console.WriteLine("The application could not be started.");
             }
-
-
         }
 
         /// <summary>
@@ -124,6 +123,7 @@ namespace MJU23v_D10_inl_sveng
             System.Console.WriteLine("delete - removes any give word from the dictionary.");
             System.Console.WriteLine("translate - shows the translation of any given word in the dictionary.");
             System.Console.WriteLine("q / quit - stops the application.");
+            
             return SUCCESS;
         }
 
@@ -161,8 +161,10 @@ namespace MJU23v_D10_inl_sveng
             else
             {
                 System.Console.WriteLine("Invalid path for {0}", customPath);
-                return FAILED;
             }
+
+            return FAILED;
+
         }
 
         // FIXME document this
@@ -172,6 +174,7 @@ namespace MJU23v_D10_inl_sveng
             {
                 Console.WriteLine(word.ToString());
             }
+
             return SUCCESS;
         }
 
@@ -185,17 +188,14 @@ namespace MJU23v_D10_inl_sveng
             }
             else if (arguments.Length == 1)
             {
-
                 Word? word = convertUserInputToWordObject();
                 if (word != null)
                 {
                     glossary.Add(word);
                     return SUCCESS;
                 }
-
-                //  FIXME
-                //  * Create a function updateGlossaryDatabase() to update the file
             }
+
             return FAILED;
         }
 
@@ -207,9 +207,11 @@ namespace MJU23v_D10_inl_sveng
                 Word? word = null;
                 if (arguments.Length == 1)
                     word = convertUserInputToWordObject();
-                else if (arguments.Length == 3)
+                
+                if (arguments.Length == 3)
                     word = glossary[i];
-                else
+                
+                if (word == null)
                     return FAILED;
 
                 if (word.Origin == arguments[1] && word.Translation == arguments[2])
@@ -218,13 +220,14 @@ namespace MJU23v_D10_inl_sveng
                     return SUCCESS;
                 }
             }
+
             return FAILED;
         }
 
         // FIXME document this
         private Response translateWord(string[] arguments)
         {
-            Response hasMatch = FAILED;
+            Response isTranslated = FAILED;
             if (arguments.Length == 2)
             {
                 foreach (Word word in glossary)
@@ -232,12 +235,12 @@ namespace MJU23v_D10_inl_sveng
                     if (word.Origin == arguments[1])
                     {
                         word.printTranslation();
-                        hasMatch = SUCCESS;
+                        isTranslated = SUCCESS;
                     }
                     if (word.Translation == arguments[1])
                     {
                         word.printOrigin();
-                        hasMatch = SUCCESS;
+                        isTranslated = SUCCESS;
                     }
                 }
             }
@@ -250,24 +253,22 @@ namespace MJU23v_D10_inl_sveng
                     if (word.Origin == userInputWord)
                     {
                         word.printTranslation();
-                        hasMatch = SUCCESS;
-
+                        isTranslated = SUCCESS;
                     }
                     if (word.Translation == userInputWord)
                     {
                         word.printOrigin();
-                        hasMatch = SUCCESS;
-
+                        isTranslated = SUCCESS;
                     }
                 }
             }
 
-            if (hasMatch.Equals(FAILED))
+            if (isTranslated.Equals(FAILED))
             {
                 System.Console.WriteLine("No match found in dictionary!");
             }
 
-            return hasMatch;
+            return isTranslated;
         }
 
         //  FIXME document this
@@ -294,6 +295,7 @@ namespace MJU23v_D10_inl_sveng
 
                 glossary.Add(new Word(origin, translate));
             }
+
             return SUCCESS;
         }
 
@@ -320,6 +322,7 @@ namespace MJU23v_D10_inl_sveng
             {
                 System.Console.WriteLine(exception.ToString());
             }
+
             return new string[] { "" };
         }
 
@@ -356,6 +359,7 @@ namespace MJU23v_D10_inl_sveng
             {
                 System.Console.WriteLine("You need to write something!");
             }
+
             return input;
         }
 
@@ -370,6 +374,7 @@ namespace MJU23v_D10_inl_sveng
             {
                 return input.Trim().ToLower();
             }
+
             return "";
         }
 
@@ -388,7 +393,7 @@ namespace MJU23v_D10_inl_sveng
         /// </summary>
         /// <param name="variable">Any data type.</param>
         /// <returns>true as long as the param has a value seperated from null, empty and new line character.</returns>
-        private bool hasValue(object variable)
+        private bool hasValue(object? variable)
         {
             if (variable != null)
             {
